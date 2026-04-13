@@ -74,6 +74,8 @@ int main() {
     Book library[SIZE];
     string inputISBN;
     bool found;
+    int choice;
+    char confirm;
 
     // Initialize 5 books
     library[0].setBookDetails("The Great Gatsby", "F. Scott Fitzgerald", "1001", true, "01/01/2024");
@@ -93,13 +95,20 @@ int main() {
             library[i].displayBookDetails();
         }
 
-        cout << "Enter the ISBN of the book you want to borrow (0 to exit): ";
-        cin >> inputISBN;
+        cout << "\nMenu:" << endl;
+        cout << "1. Borrow a book" << endl;
+        cout << "2. Return a book" << endl;
+        cout << "0. Exit" << endl;
+        cout << "Enter your choice: ";
+        cin >> choice;
 
-        if (inputISBN == "0") {
+        if (choice == 0) {
             cout << "Program terminated." << endl;
             break;
         }
+
+        cout << "Enter the ISBN of the book: ";
+        cin >> inputISBN;
 
         found = false;
 
@@ -107,13 +116,46 @@ int main() {
             if (library[i].getISBN() == inputISBN) {
                 found = true;
 
-                if (library[i].borrowBook()) {
-                    cout << "\nBook borrowed successfully." << endl;
-                    library[i].displayBookDetails();
+                if (choice == 1) {
+                    if (library[i].isAvailable()) {
+                        cout << "Do you want to borrow this book? (y/n): ";
+                        cin >> confirm;
+
+                        if (confirm == 'y' || confirm == 'Y') {
+                            library[i].borrowBook();
+                            cout << "\nBook borrowed successfully." << endl;
+                            library[i].displayBookDetails();
+                        }
+                        else {
+                            cout << "\nBorrow cancelled." << endl;
+                        }
+                    }
+                    else {
+                        cout << "\nError: This book is currently unavailable." << endl;
+                    }
+                }
+                else if (choice == 2) {
+                    if (!library[i].isAvailable()) {
+                        cout << "Do you want to return this book? (y/n): ";
+                        cin >> confirm;
+
+                        if (confirm == 'y' || confirm == 'Y') {
+                            library[i].returnBook();
+                            cout << "\nBook returned successfully." << endl;
+                            library[i].displayBookDetails();
+                        }
+                        else {
+                            cout << "\nReturn cancelled." << endl;
+                        }
+                    }
+                    else {
+                        cout << "\nThis book is already available in the library." << endl;
+                    }
                 }
                 else {
-                    cout << "\nError: This book is currently unavailable." << endl;
+                    cout << "\nInvalid menu choice." << endl;
                 }
+
                 break;
             }
         }
@@ -122,7 +164,7 @@ int main() {
             cout << "\nError: Book not found." << endl;
         }
 
-    } while (inputISBN != "0");
+    } while (choice != 0);
 
     return 0;
 }
