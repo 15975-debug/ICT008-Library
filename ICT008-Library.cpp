@@ -3,8 +3,9 @@
 
 using namespace std;
 
+// Parent class
 class Book {
-private:
+protected:
     string title;
     string author;
     string isbn;
@@ -12,7 +13,17 @@ private:
     string dateAdd;
 
 public:
-    // Set book details
+    Book() {
+        title = "";
+        author = "";
+        isbn = "";
+        availability = true;
+        dateAdd = "";
+    }
+
+    virtual ~Book() {
+    }
+
     void setBookDetails(string t, string a, string i, bool avail, string d) {
         title = t;
         author = a;
@@ -21,17 +32,14 @@ public:
         dateAdd = d;
     }
 
-    // Display book details
-    void displayBookDetails() const {
+    virtual void displayBookDetails() const {
         cout << "Title: " << title << endl;
         cout << "Author: " << author << endl;
         cout << "ISBN: " << isbn << endl;
         cout << "Date Added: " << dateAdd << endl;
         cout << "Availability: " << (availability ? "Available" : "Borrowed") << endl;
-        cout << "--------------------------" << endl;
     }
 
-    // Borrow book
     bool borrowBook() {
         if (availability) {
             availability = false;
@@ -40,27 +48,25 @@ public:
         return false;
     }
 
-    // Return book
     void returnBook() {
         availability = true;
     }
 
-    // Getter for ISBN
     string getISBN() const {
         return isbn;
     }
 
-    // Getter for availability
     bool isAvailable() const {
         return availability;
     }
 
-    // Sort books by ISBN
-    static void sortBookData(Book books[], int size) {
+    virtual string getBookType() const = 0;
+
+    static void sortBookData(Book* books[], int size) {
         for (int i = 0; i < size - 1; i++) {
             for (int j = 0; j < size - i - 1; j++) {
-                if (books[j].isbn > books[j + 1].isbn) {
-                    Book temp = books[j];
+                if (books[j]->getISBN() > books[j + 1]->getISBN()) {
+                    Book* temp = books[j];
                     books[j] = books[j + 1];
                     books[j + 1] = temp;
                 }
@@ -69,102 +75,164 @@ public:
     }
 };
 
+// Child class for hardcopy books
+class HardcopyBook : public Book {
+private:
+    string shelfNumber;
+
+public:
+    void setShelfNumber(string shelf) {
+        shelfNumber = shelf;
+    }
+
+    void displayBookDetails() const override {
+        cout << "Book Type: Hardcopy Book" << endl;
+        Book::displayBookDetails();
+        cout << "Shelf Number: " << shelfNumber << endl;
+        cout << "--------------------------" << endl;
+    }
+
+    string getBookType() const override {
+        return "Hardcopy Book";
+    }
+};
+
+// Child class for e-books
+class EBook : public Book {
+private:
+    string endOfLicenseDate;
+
+public:
+    void setLicenseDate(string date) {
+        endOfLicenseDate = date;
+    }
+
+    void displayBookDetails() const override {
+        cout << "Book Type: E-Book" << endl;
+        Book::displayBookDetails();
+        cout << "End of License Date: " << endOfLicenseDate << endl;
+        cout << "--------------------------" << endl;
+    }
+
+    string getBookType() const override {
+        return "E-Book";
+    }
+};
+
+// Function to find a book by ISBN
+int findBookByISBN(Book* books[], int size, string isbn) {
+    for (int i = 0; i < size; i++) {
+        if (books[i]->getISBN() == isbn) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 int main() {
     const int SIZE = 5;
-    Book library[SIZE];
-    string inputISBN;
-    bool found;
+    Book* library[SIZE];
     int choice;
-    char confirm;
+    string inputISBN;
 
-    // Initialize 5 books
-    library[0].setBookDetails("The Great Gatsby", "F. Scott Fitzgerald", "1001", true, "01/01/2024");
-    library[1].setBookDetails("To Kill a Mockingbird", "Harper Lee", "1005", true, "10/01/2024");
-    library[2].setBookDetails("1984", "George Orwell", "1003", false, "15/01/2024");
-    library[3].setBookDetails("Pride and Prejudice", "Jane Austen", "1002", true, "20/01/2024");
-    library[4].setBookDetails("Moby Dick", "Herman Melville", "1004", true, "25/01/2024");
+    // Create hardcopy books
+    library[0] = new HardcopyBook();
+    library[1] = new HardcopyBook();
+    library[2] = new HardcopyBook();
+
+    // Create e-books
+    library[3] = new EBook();
+    library[4] = new EBook();
+
+    // Set hardcopy book details
+    ((HardcopyBook*)library[0])->setBookDetails("The Great Gatsby", "F. Scott Fitzgerald", "1003", true, "01/01/2024");
+    ((HardcopyBook*)library[0])->setShelfNumber("A12");
+
+    ((HardcopyBook*)library[1])->setBookDetails("To Kill a Mockingbird", "Harper Lee", "1001", true, "05/01/2024");
+    ((HardcopyBook*)library[1])->setShelfNumber("B05");
+
+    ((HardcopyBook*)library[2])->setBookDetails("1984", "George Orwell", "1005", false, "10/01/2024");
+    ((HardcopyBook*)library[2])->setShelfNumber("C08");
+
+    // Set e-book details
+    ((EBook*)library[3])->setBookDetails("Digital Marketing Basics", "John Smith", "1002", true, "15/01/2024");
+    ((EBook*)library[3])->setLicenseDate("15/01/2027");
+
+    ((EBook*)library[4])->setBookDetails("C++ Programming Guide", "Jane Brown", "1004", true, "20/01/2024");
+    ((EBook*)library[4])->setLicenseDate("20/01/2028");
 
     // Sort books by ISBN
     Book::sortBookData(library, SIZE);
 
-    cout << "===== Library Book Management System =====" << endl;
-
     do {
-        cout << "\nBook List:" << endl;
-        for (int i = 0; i < SIZE; i++) {
-            library[i].displayBookDetails();
-        }
-
-        cout << "\nMenu:" << endl;
-        cout << "1. Borrow a book" << endl;
-        cout << "2. Return a book" << endl;
+        cout << "\n===== Library Management System - Phase 2 =====" << endl;
+        cout << "1. Display all books" << endl;
+        cout << "2. Borrow a book" << endl;
+        cout << "3. Return a book" << endl;
         cout << "0. Exit" << endl;
         cout << "Enter your choice: ";
         cin >> choice;
 
-        if (choice == 0) {
-            cout << "Program terminated." << endl;
+        switch (choice) {
+        case 1:
+            cout << "\nLibrary Book List:" << endl;
+            for (int i = 0; i < SIZE; i++) {
+                library[i]->displayBookDetails();
+            }
+            break;
+
+        case 2: {
+            cout << "\nEnter ISBN of the book you want to borrow: ";
+            cin >> inputISBN;
+
+            int index = findBookByISBN(library, SIZE, inputISBN);
+
+            if (index == -1) {
+                cout << "Error: Book not found." << endl;
+            }
+            else {
+                if (library[index]->borrowBook()) {
+                    cout << "Book borrowed successfully." << endl;
+                    library[index]->displayBookDetails();
+                }
+                else {
+                    cout << "Error: This book is currently unavailable." << endl;
+                }
+            }
             break;
         }
 
-        cout << "Enter the ISBN of the book: ";
-        cin >> inputISBN;
+        case 3: {
+            cout << "\nEnter ISBN of the book you want to return: ";
+            cin >> inputISBN;
 
-        found = false;
+            int index = findBookByISBN(library, SIZE, inputISBN);
 
-        for (int i = 0; i < SIZE; i++) {
-            if (library[i].getISBN() == inputISBN) {
-                found = true;
-
-                if (choice == 1) {
-                    if (library[i].isAvailable()) {
-                        cout << "Do you want to borrow this book? (y/n): ";
-                        cin >> confirm;
-
-                        if (confirm == 'y' || confirm == 'Y') {
-                            library[i].borrowBook();
-                            cout << "\nBook borrowed successfully." << endl;
-                            library[i].displayBookDetails();
-                        }
-                        else {
-                            cout << "\nBorrow cancelled." << endl;
-                        }
-                    }
-                    else {
-                        cout << "\nError: This book is currently unavailable." << endl;
-                    }
-                }
-                else if (choice == 2) {
-                    if (!library[i].isAvailable()) {
-                        cout << "Do you want to return this book? (y/n): ";
-                        cin >> confirm;
-
-                        if (confirm == 'y' || confirm == 'Y') {
-                            library[i].returnBook();
-                            cout << "\nBook returned successfully." << endl;
-                            library[i].displayBookDetails();
-                        }
-                        else {
-                            cout << "\nReturn cancelled." << endl;
-                        }
-                    }
-                    else {
-                        cout << "\nThis book is already available in the library." << endl;
-                    }
-                }
-                else {
-                    cout << "\nInvalid menu choice." << endl;
-                }
-
-                break;
+            if (index == -1) {
+                cout << "Error: Book not found." << endl;
             }
+            else {
+                library[index]->returnBook();
+                cout << "Book returned successfully." << endl;
+                library[index]->displayBookDetails();
+            }
+            break;
         }
 
-        if (!found) {
-            cout << "\nError: Book not found." << endl;
+        case 0:
+            cout << "Program terminated." << endl;
+            break;
+
+        default:
+            cout << "Invalid choice. Please try again." << endl;
         }
 
     } while (choice != 0);
+
+    // Free memory
+    for (int i = 0; i < SIZE; i++) {
+        delete library[i];
+    }
 
     return 0;
 }
