@@ -20,24 +20,8 @@ void Book::displayBookDetails() const {
     cout << "--------------------------" << endl;
 }
 
-bool Book::borrowBook() {
-    if (availability) {
-        availability = false;
-        return true;
-    }
-    return false;
-}
-
-void Book::returnBook() {
-    availability = true;
-}
-
 string Book::getISBN() const {
     return isbn;
-}
-
-bool Book::isAvailable() const {
-    return availability;
 }
 
 void Book::sortBookData(Book books[], int size) {
