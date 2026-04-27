@@ -168,4 +168,42 @@ public:
             }
         }
     }
+
+    // Search by ISBN
+    int findBook(string isbn) {
+        for (int i = 0; i < MAX; i++) {
+            if (collection[i] != nullptr && collection[i]->getISBN() == isbn) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    // Borrow book
+    void borrowBook(string isbn) {
+        int index = findBook(isbn);
+
+        if (index == -1) {
+            cout << "Book not found.\n";
+            return;
+        }
+
+        cout << "Borrowing book:\n";
+        collection[index]->showBook();
+        cout << "Book borrowed successfully.\n";
+    }
+
+    // Return book
+    void returnBook(string isbn) {
+        int index = findBook(isbn);
+
+        if (index == -1) {
+            cout << "Book not found.\n";
+            return;
+        }
+
+        cout << "Returning book:\n";
+        collection[index]->showBook();
+        cout << "Book returned successfully.\n";
+    }
 };
